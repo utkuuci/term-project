@@ -1,0 +1,35 @@
+
+version: '3'
+
+services:
+  proxy:
+    container_name: proxy
+    restart: always
+    build: .
+    ports:
+      - "80:80/tcp"
+    networks:
+      docker_net:
+        ipv4_address: 10.79.90.3
+
+  dns:
+    restart: always
+    image: strm/dnsmasq
+    volumes:
+      - ./dnsmasq.conf:/etc/dnsmasq.conf
+    ports:
+      - "53:53/udp"
+    cap_add:
+      - NET_ADMIN
+    networks:
+      docker_net:
+        ipv4_address: 10.79.90.2
+
+networks:
+  docker_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.79.90.0/24
+          gateway: 10.79.90.1
