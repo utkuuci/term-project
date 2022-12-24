@@ -47,8 +47,6 @@ public class ServerHandler extends Thread{
             System.out.println("Header From Client");
             System.out.println(header);
 
-            
-
             if(header.contains("Ban-Url: ")) {
                 WriteFileService writeFileService = CoreFactory.creaWriteFileService(new File(Paths.get("Project", "Proxy", "DarkList.txt").toAbsolutePath().toString()));
                 String s = header.substring(header.indexOf(" "), header.indexOf("\r\n"));
@@ -106,12 +104,16 @@ public class ServerHandler extends Thread{
 
                 System.out.println("---- MOD HEADER ----");
                 System.out.println(modHeader);
-                
-                String fullPath = header.substring(fsp+1, ssp);
-                
+
+                // String fullPath = header.substring(fsp+1, ssp);
+                String sPath = header.substring(fsp+1, ssp);
+                int index = header.indexOf("Host: ");
+                int eol3 = header.indexOf("\r\n", index);
+                String host = header.substring(index+6, eol3);
+
                 // Convert String to URL format
-                System.out.println(fullPath);
-                URL url = new URL(fullPath);
+                System.out.println(host+sPath);
+                URL url = new URL("http://"+host+sPath);
                 String domain = url.getHost();
                 
                 ReadFileService readFileService = CoreFactory.creatReadFileService(new File(Paths.get("Project", "Proxy", "DarkList.txt").toAbsolutePath().toString()));
@@ -242,8 +244,7 @@ public class ServerHandler extends Thread{
 
         if(statusCode == 200) {
             int contIndex = responseHeader.indexOf("Content-Length: ");
-            int eol = responseHeader.indexOf("\r\n", contIndex);
-
+            int eol = responseHeader.indexOf("\r\n", contIndex);    
             int size = Integer.parseInt(responseHeader.substring(contIndex + 16, eol));
 
             System.out.println("Response size: " + size);
@@ -297,7 +298,6 @@ public class ServerHandler extends Thread{
         if(statusCode == 304) {
             int eol= responseHeader.indexOf("\r\n");
             responseHeader="HTTP/1.1 200 OK\nContent-Length: "+cacheItem.length+responseHeader.substring(eol+1);
-            
             dos.write(responseHeader.getBytes());
             
             dos.write(cacheItem.data);
